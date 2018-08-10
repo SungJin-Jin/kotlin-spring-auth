@@ -32,7 +32,11 @@ class UserHandler(
         checkUserAvailability(errors, register.email, register.username)
         InvalidRequest.check(errors)
 
-        val user = User(username = register.username!!, email = register.email!!, password = BCrypt.hashpw(register.password, BCrypt.gensalt()))
+        val user = User(
+                username = register.username!!,
+                email = register.email!!,
+                password = BCrypt.hashpw(register.password, BCrypt.gensalt())
+        )
 
         return mapOf("user" to service.updateToken(user))
     }
