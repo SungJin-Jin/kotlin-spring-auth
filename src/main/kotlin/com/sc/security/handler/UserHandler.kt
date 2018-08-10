@@ -1,7 +1,11 @@
 package com.sc.security.handler
 
-import com.sc.security.datas.Register
+import com.sc.security.datas.inout.Login
+import com.sc.security.datas.inout.Register
 import com.sc.security.datas.User
+import com.sc.security.exception.ForbiddenRequestException
+import com.sc.security.exception.InvalidException
+import com.sc.security.exception.InvalidLoginException
 import com.sc.security.exception.InvalidRequest
 import com.sc.security.repository.UserRepository
 import com.sc.security.service.UserService
@@ -20,7 +24,7 @@ class UserHandler(
         val service: UserService
 ) {
 
-    @PostMapping("api/users")
+    @PostMapping("/api/users")
     fun register(@Valid @RequestBody register: Register, errors: Errors): Any {
         InvalidRequest.check(errors)
 
@@ -29,9 +33,24 @@ class UserHandler(
         InvalidRequest.check(errors)
 
         val user = User(username = register.username!!, email = register.email!!, password = BCrypt.hashpw(register.password, BCrypt.gensalt()))
-        user.token = service.newToken(user)
 
-        return mapOf("user" to user)
+        return mapOf("user" to service.updateToken(user))
+    }
+
+    @PostMapping("/api/users/login")
+    fun login(@Valid @RequestBody login: Login, errors: Errors): Any {
+        InvalidRequest.check(errors)
+
+        try {
+            service.login(login)?.let {
+                return mapOf("user" to service.updateToken(it))
+            }
+            return ForbiddenRequestException()
+        } catch (e: InvalidLoginException) {
+            val errors = BindException(this, "")
+            errors.addError(FieldError("", e.field, e.error))
+            throw InvalidException(errors)
+        }
     }
 
     private fun checkUserAvailability(errors: BindException, email: String?, username: String?) {
