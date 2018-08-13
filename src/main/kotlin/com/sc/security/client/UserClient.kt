@@ -3,6 +3,7 @@ package com.sc.security.client
 import com.sc.security.client.response.InLogin
 import com.sc.security.client.response.InRegister
 import com.sc.security.client.response.OutUser
+import com.sc.security.datas.inout.Register
 import feign.Headers
 import feign.RequestLine
 

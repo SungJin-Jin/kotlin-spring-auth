@@ -27,13 +27,13 @@ sourceCompatibility = 1.8
 compileKotlin {
     kotlinOptions {
         freeCompilerArgs = ["-Xjsr305=strict"]
-        jvmTarget = "1.8"
+        jvmTarget = sourceCompatibility
     }
 }
 compileTestKotlin {
     kotlinOptions {
         freeCompilerArgs = ["-Xjsr305=strict"]
-        jvmTarget = "1.8"
+        jvmTarget = sourceCompatibility
     }
 }
 
@@ -52,7 +52,6 @@ dependencyManagement {
 
 dependencies {
     implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
-    implementation 'org.springframework.boot:spring-boot-starter-security'
     implementation 'org.springframework.boot:spring-boot-starter-web'
     implementation 'org.springframework.cloud:spring-cloud-starter-openfeign'
     implementation 'com.fasterxml.jackson.module:jackson-module-kotlin'
@@ -60,6 +59,7 @@ dependencies {
     implementation "org.jetbrains.kotlin:kotlin-reflect"
     implementation 'io.jsonwebtoken:jjwt:0.7.0'
     implementation "com.h2database:h2"
+    implementation 'com.netflix.feign:feign-gson:8.18.0'
 
     testImplementation 'org.springframework.boot:spring-boot-starter-test'
     testImplementation 'org.springframework.security:spring-security-test'

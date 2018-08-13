@@ -17,7 +17,7 @@ data class User(
         var bio: String = "",
         var image: String = "",
         @ManyToMany @JsonIgnore
-        var followes: List<User> = mutableListOf()
+        var follows: List<User> = mutableListOf()
 ) {
     override fun toString(): String = "User($email, $username)"
 }

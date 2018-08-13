@@ -6,6 +6,10 @@ spring:
     username: sa
     password:
 
+  jackson:
+    deserialization:
+      UNWRAP_ROOT_VALUE: true
+
 jwt:
   secrect: Em3u7dCZ2QSvSGSGSRFUTfrwgu3WjfU2rHZxSjNSqU5x89C3jXPL6WLMW7dTE6rd9NRgWAwUWHkj8ZLfbCNU8uVfv9kuBmWCYPkk776A5jQ2LeJ76bZbdhXN
   issuer: Kotlin&Spring

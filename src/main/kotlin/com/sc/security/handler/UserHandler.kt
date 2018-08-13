@@ -1,8 +1,8 @@
 package com.sc.security.handler
 
+import com.sc.security.datas.User
 import com.sc.security.datas.inout.Login
 import com.sc.security.datas.inout.Register
-import com.sc.security.datas.User
 import com.sc.security.exception.ForbiddenRequestException
 import com.sc.security.exception.InvalidException
 import com.sc.security.exception.InvalidLoginException
@@ -19,10 +19,7 @@ import org.springframework.web.bind.annotation.RestController
 import javax.validation.Valid
 
 @RestController
-class UserHandler(
-        val repository: UserRepository,
-        val service: UserService
-) {
+class UserHandler(val repository: UserRepository, val service: UserService) {
 
     @PostMapping("/api/users")
     fun register(@Valid @RequestBody register: Register, errors: Errors): Any {
@@ -37,8 +34,9 @@ class UserHandler(
                 email = register.email!!,
                 password = BCrypt.hashpw(register.password, BCrypt.gensalt())
         )
+        user.token = service.newToken(user)
 
-        return mapOf("user" to service.updateToken(user))
+        return mapOf("user" to repository.save(user))
     }
 
     @PostMapping("/api/users/login")

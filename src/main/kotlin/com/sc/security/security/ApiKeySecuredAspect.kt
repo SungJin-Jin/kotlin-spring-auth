@@ -14,9 +14,7 @@ import javax.servlet.http.HttpServletResponse
 
 @Aspect
 @Component
-class ApiKeySecuredAspect(
-        @Autowired val userService: UserService
-) {
+class ApiKeySecuredAspect(@Autowired val userService: UserService) {
 
     companion object {
         private val LOG = LoggerFactory.getLogger(ApiKeySecuredAspect::class.java)

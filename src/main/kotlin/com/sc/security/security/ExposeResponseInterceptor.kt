@@ -4,10 +4,10 @@ import org.springframework.web.servlet.handler.HandlerInterceptorAdapter
 import javax.servlet.http.HttpServletRequest
 import javax.servlet.http.HttpServletResponse
 
-class ExposeResponseInterceptor: HandlerInterceptorAdapter() {
+class ExposeResponseInterceptor : HandlerInterceptorAdapter() {
 
     companion object {
-        val KEY = "spring.internal.httpServletResponse"
+        const val KEY = "spring.internal.httpServletResponse"
     }
 
     @Throws
