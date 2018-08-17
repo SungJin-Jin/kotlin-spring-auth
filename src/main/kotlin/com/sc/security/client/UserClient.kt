@@ -1,8 +1,7 @@
 package com.sc.security.client
 
-import com.sc.security.client.response.InLogin
-import com.sc.security.client.response.InRegister
-import com.sc.security.client.response.OutUser
+import com.sc.security.datas.User
+import com.sc.security.datas.inout.Login
 import com.sc.security.datas.inout.Register
 import feign.Headers
 import feign.RequestLine
@@ -11,8 +10,8 @@ import feign.RequestLine
 interface UserClient {
 
     @RequestLine("POST /api/users")
-    fun register(register: InRegister): OutUser
+    fun register(register: Register): User
 
     @RequestLine("POST /api/users/login")
-    fun login(login: InLogin): OutUser
+    fun login(login: Login): User
 }

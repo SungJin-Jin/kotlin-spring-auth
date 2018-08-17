@@ -1,7 +1,6 @@
 package com.sc.security.handler
 
 import com.sc.security.client.UserClient
-import com.sc.security.client.response.InRegister
 import com.sc.security.datas.inout.Register
 import feign.Feign
 import feign.gson.GsonDecoder
@@ -42,10 +41,10 @@ class UserHandlerTest {
 
     @Test
     fun test_generate_token_when_user_register() {
-        val register = userClient.register(InRegister(Register(username = "tddda", email = "tddda@gmail.com", password = "tddda")))
+        val register = userClient.register(Register(username = "tddda", email = "tddda@gmail.com", password = "tddda"))
 
-        assertEquals("tddda", register.user.username)
-        assertEquals("tddda@gmail.com", register.user.email)
-        assertThat(register.user.token, Matchers.notNullValue())
+        assertEquals("tddda", register.username)
+        assertEquals("tddda@gmail.com", register.email)
+        assertThat(register.token, Matchers.notNullValue())
     }
 }

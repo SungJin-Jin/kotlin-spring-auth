@@ -28,7 +28,7 @@ class UserHandler(val repository: UserRepository, val service: UserService) {
         InvalidRequest.check(errors)
 
         val errors = BindException(this, "")
-        checkUserAvailability(errors, register.email, register.username)
+        if (repository.existsByEmail(register.email!!)) errors.addError(createFiledError("email"))
         InvalidRequest.check(errors)
 
         val user = User(
@@ -61,15 +61,7 @@ class UserHandler(val repository: UserRepository, val service: UserService) {
     @GetMapping("/api/user")
     fun currentUser() = view(service.currentUser())
 
-    private fun checkUserAvailability(errors: BindException, email: String?, username: String?) {
-        email?.apply {
-            if (repository.existsByEmail(this)) errors.addError(FieldError("", "email", "already taken"))
-        }
-
-        username?.apply {
-            if (repository.existsByUsername(this)) errors.addError(FieldError("", "username", "already taken"))
-        }
-    }
+    private fun createFiledError(filed: String): FieldError = FieldError("", filed, "already taken")
 
     private fun view(user: User) = mapOf("user" to user)
 }
