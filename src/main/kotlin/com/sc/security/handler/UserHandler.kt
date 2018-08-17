@@ -8,11 +8,13 @@ import com.sc.security.exception.InvalidException
 import com.sc.security.exception.InvalidLoginException
 import com.sc.security.exception.InvalidRequest
 import com.sc.security.repository.UserRepository
+import com.sc.security.security.ApiKeySecured
 import com.sc.security.service.UserService
 import org.springframework.security.crypto.bcrypt.BCrypt
 import org.springframework.validation.BindException
 import org.springframework.validation.Errors
 import org.springframework.validation.FieldError
+import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.PostMapping
 import org.springframework.web.bind.annotation.RequestBody
 import org.springframework.web.bind.annotation.RestController
@@ -36,7 +38,7 @@ class UserHandler(val repository: UserRepository, val service: UserService) {
         )
         user.token = service.newToken(user)
 
-        return mapOf("user" to repository.save(user))
+        return view(repository.save(user))
     }
 
     @PostMapping("/api/users/login")
@@ -45,7 +47,7 @@ class UserHandler(val repository: UserRepository, val service: UserService) {
 
         try {
             service.login(login)?.let {
-                return mapOf("user" to service.updateToken(it))
+                return view(service.updateToken(it))
             }
             return ForbiddenRequestException()
         } catch (e: InvalidLoginException) {
@@ -54,6 +56,10 @@ class UserHandler(val repository: UserRepository, val service: UserService) {
             throw InvalidException(errors)
         }
     }
+
+    @ApiKeySecured
+    @GetMapping("/api/user")
+    fun currentUser() = view(service.currentUser())
 
     private fun checkUserAvailability(errors: BindException, email: String?, username: String?) {
         email?.apply {
@@ -64,4 +70,6 @@ class UserHandler(val repository: UserRepository, val service: UserService) {
             if (repository.existsByUsername(this)) errors.addError(FieldError("", "username", "already taken"))
         }
     }
+
+    private fun view(user: User) = mapOf("user" to user)
 }

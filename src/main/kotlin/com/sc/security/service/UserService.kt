@@ -29,7 +29,7 @@ class UserService(
         throw InvalidLoginException("password", "invalid password")
     }
 
-    fun currentUser():User? = currentUser.get()
+    fun currentUser(): User = currentUser.get()
 
     fun setCurrentUser(user: User): User {
         currentUser.set(user)
