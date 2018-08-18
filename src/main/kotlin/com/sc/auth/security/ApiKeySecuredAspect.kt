@@ -1,7 +1,7 @@
-package com.sc.security.security
+package com.sc.auth.security
 
-import com.sc.security.datas.User
-import com.sc.security.service.UserService
+import com.sc.auth.datas.User
+import com.sc.auth.service.UserService
 import org.aspectj.lang.ProceedingJoinPoint
 import org.aspectj.lang.annotation.Around
 import org.aspectj.lang.annotation.Aspect
@@ -26,7 +26,7 @@ class ApiKeySecuredAspect(@Autowired val userService: UserService) {
     @Autowired
     var request: HttpServletRequest? = null
 
-    @Pointcut(value = "execution(@com.sc.security.security.ApiKeySecured * *.*(..))")
+    @Pointcut(value = "execution(@com.sc.auth.security.ApiKeySecured * *.*(..))")
     fun securedApiPointcut() = Unit
 
     @Around("securedApiPointcut()")

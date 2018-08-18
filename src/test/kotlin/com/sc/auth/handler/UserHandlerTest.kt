@@ -1,7 +1,7 @@
-package com.sc.security.handler
+package com.sc.auth.handler
 
-import com.sc.security.client.UserClient
-import com.sc.security.datas.inout.Register
+import com.sc.auth.client.UserClient
+import com.sc.auth.datas.inout.Register
 import feign.Feign
 import feign.gson.GsonDecoder
 import feign.gson.GsonEncoder

@@ -1,4 +1,4 @@
-package com.sc.security.exception
+package com.sc.auth.exception
 
 import org.springframework.http.HttpStatus
 import org.springframework.web.bind.annotation.ResponseStatus

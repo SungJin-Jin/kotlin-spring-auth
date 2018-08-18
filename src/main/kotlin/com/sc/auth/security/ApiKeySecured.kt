@@ -1,4 +1,4 @@
-package com.sc.security.security
+package com.sc.auth.security
 
 import java.lang.annotation.Documented
 import java.lang.annotation.Inherited

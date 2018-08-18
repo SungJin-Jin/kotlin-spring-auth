@@ -1,6 +1,6 @@
-package com.sc.security.repository
+package com.sc.auth.repository
 
-import com.sc.security.datas.User
+import com.sc.auth.datas.User
 import org.springframework.data.repository.CrudRepository
 import org.springframework.stereotype.Repository
 

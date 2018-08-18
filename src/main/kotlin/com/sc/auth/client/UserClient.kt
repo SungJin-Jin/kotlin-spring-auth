@@ -1,8 +1,8 @@
-package com.sc.security.client
+package com.sc.auth.client
 
-import com.sc.security.datas.User
-import com.sc.security.datas.inout.Login
-import com.sc.security.datas.inout.Register
+import com.sc.auth.datas.User
+import com.sc.auth.datas.inout.Login
+import com.sc.auth.datas.inout.Register
 import feign.Headers
 import feign.RequestLine
 

@@ -1,6 +1,6 @@
-package com.sc.security
+package com.sc.auth
 
-import com.sc.security.security.ExposeResponseInterceptor
+import com.sc.auth.security.ExposeResponseInterceptor
 import org.springframework.boot.autoconfigure.SpringBootApplication
 import org.springframework.boot.runApplication
 import org.springframework.cache.annotation.EnableCaching
@@ -17,7 +17,7 @@ import org.springframework.web.servlet.config.annotation.WebMvcConfigurer
 @EnableCaching
 @EnableFeignClients
 @SpringBootApplication
-class SecurityApplication : WebMvcConfigurer {
+class AuthApplication : WebMvcConfigurer {
 
     override fun addCorsMappings(registry: CorsRegistry) {
         registry.addMapping("/api/**")
@@ -49,5 +49,5 @@ class SecurityApplication : WebMvcConfigurer {
 }
 
 fun main(args: Array<String>) {
-    runApplication<SecurityApplication>(*args)
+    runApplication<AuthApplication>(*args)
 }

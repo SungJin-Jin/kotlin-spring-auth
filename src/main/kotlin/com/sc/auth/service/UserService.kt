@@ -1,9 +1,9 @@
-package com.sc.security.service
+package com.sc.auth.service
 
-import com.sc.security.datas.User
-import com.sc.security.datas.inout.Login
-import com.sc.security.exception.InvalidLoginException
-import com.sc.security.repository.UserRepository
+import com.sc.auth.datas.User
+import com.sc.auth.datas.inout.Login
+import com.sc.auth.exception.InvalidLoginException
+import com.sc.auth.repository.UserRepository
 import io.jsonwebtoken.Jwts
 import io.jsonwebtoken.SignatureAlgorithm
 import org.springframework.beans.factory.annotation.Value

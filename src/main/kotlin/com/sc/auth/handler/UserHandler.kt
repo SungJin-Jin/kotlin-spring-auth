@@ -1,15 +1,15 @@
-package com.sc.security.handler
+package com.sc.auth.handler
 
-import com.sc.security.datas.User
-import com.sc.security.datas.inout.Login
-import com.sc.security.datas.inout.Register
-import com.sc.security.exception.ForbiddenRequestException
-import com.sc.security.exception.InvalidException
-import com.sc.security.exception.InvalidLoginException
-import com.sc.security.exception.InvalidRequest
-import com.sc.security.repository.UserRepository
-import com.sc.security.security.ApiKeySecured
-import com.sc.security.service.UserService
+import com.sc.auth.datas.User
+import com.sc.auth.datas.inout.Login
+import com.sc.auth.datas.inout.Register
+import com.sc.auth.exception.ForbiddenRequestException
+import com.sc.auth.exception.InvalidException
+import com.sc.auth.exception.InvalidLoginException
+import com.sc.auth.exception.InvalidRequest
+import com.sc.auth.repository.UserRepository
+import com.sc.auth.security.ApiKeySecured
+import com.sc.auth.service.UserService
 import org.springframework.security.crypto.bcrypt.BCrypt
 import org.springframework.validation.BindException
 import org.springframework.validation.Errors

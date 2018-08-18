@@ -1,4 +1,4 @@
-package com.sc.security.datas
+package com.sc.auth.datas
 
 import com.fasterxml.jackson.annotation.JsonIgnore
 import com.fasterxml.jackson.annotation.JsonRootName

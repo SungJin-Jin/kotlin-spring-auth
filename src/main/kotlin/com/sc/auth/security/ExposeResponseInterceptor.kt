@@ -1,4 +1,4 @@
-package com.sc.security.security
+package com.sc.auth.security
 
 import org.springframework.web.servlet.handler.HandlerInterceptorAdapter
 import javax.servlet.http.HttpServletRequest

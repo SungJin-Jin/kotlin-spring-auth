@@ -1,4 +1,4 @@
-package com.sc.security.exception
+package com.sc.auth.exception
 
 import org.springframework.validation.Errors
 
