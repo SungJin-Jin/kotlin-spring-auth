@@ -1,4 +1,4 @@
-package com.sc.auth.handler
+package com.sc.auth.controller
 
 import com.sc.auth.datas.User
 import com.sc.auth.datas.inout.Login
@@ -21,7 +21,7 @@ import org.springframework.web.bind.annotation.RestController
 import javax.validation.Valid
 
 @RestController
-class UserHandler(val repository: UserRepository, val service: UserService) {
+class UserController(val repository: UserRepository, val service: UserService) {
 
     @PostMapping("/api/users")
     fun register(@Valid @RequestBody register: Register, errors: Errors): Any {

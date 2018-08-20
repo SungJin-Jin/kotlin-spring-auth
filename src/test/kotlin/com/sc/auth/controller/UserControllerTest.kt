@@ -1,4 +1,4 @@
-package com.sc.auth.handler
+package com.sc.auth.controller
 
 import com.sc.auth.client.UserClient
 import com.sc.auth.datas.inout.Register
@@ -18,7 +18,7 @@ import org.springframework.test.context.junit4.SpringRunner
 
 @RunWith(SpringRunner::class)
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
-class UserHandlerTest {
+class UserControllerTest {
 
     @Autowired
     lateinit var environment: Environment
