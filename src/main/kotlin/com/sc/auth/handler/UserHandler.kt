@@ -31,14 +31,7 @@ class UserHandler(val repository: UserRepository, val service: UserService) {
         if (repository.existsByEmail(register.email!!)) errors.addError(createFiledError("email"))
         InvalidRequest.check(errors)
 
-        val user = User(
-                username = register.username!!,
-                email = register.email!!,
-                password = BCrypt.hashpw(register.password, BCrypt.gensalt())
-        )
-        user.token = service.newToken(user)
-
-        return view(repository.save(user))
+        return view(service.register(register))
     }
 
     @PostMapping("/api/users/login")

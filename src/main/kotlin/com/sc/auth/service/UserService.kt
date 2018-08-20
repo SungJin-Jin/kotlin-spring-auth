@@ -2,6 +2,7 @@ package com.sc.auth.service
 
 import com.sc.auth.datas.User
 import com.sc.auth.datas.inout.Login
+import com.sc.auth.datas.inout.Register
 import com.sc.auth.exception.InvalidLoginException
 import com.sc.auth.repository.UserRepository
 import io.jsonwebtoken.Jwts
@@ -19,6 +20,17 @@ class UserService(
 ) {
 
     private val currentUser = ThreadLocal<User>()
+
+    fun register(register: Register): User {
+        val user = User(
+                username = register.username!!,
+                email = register.email!!,
+                password = BCrypt.hashpw(register.password, BCrypt.gensalt())
+        )
+        user.token = newToken(user)
+
+        return userRepository.save(user)
+    }
 
     fun login(login: Login): User? {
         val user = userRepository.findByEmail(login.email!!)
