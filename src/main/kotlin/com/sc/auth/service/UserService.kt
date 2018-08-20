@@ -25,9 +25,9 @@ class UserService(
         val user = User(
                 username = register.username!!,
                 email = register.email!!,
-                password = BCrypt.hashpw(register.password, BCrypt.gensalt())
+                password = BCrypt.hashpw(register.password, BCrypt.gensalt()),
+                token = newToken(register.email!!)
         )
-        user.token = newToken(user)
 
         return userRepository.save(user)
     }
@@ -50,10 +50,10 @@ class UserService(
 
     fun clearCurrentUser() = currentUser.remove()
 
-    fun newToken(user: User): String {
+    fun newToken(email: String): String {
         return Jwts.builder()
                 .setIssuedAt(Date())
-                .setSubject(user.email)
+                .setSubject(email)
                 .setIssuer(issuer)
                 .setExpiration(Date(System.currentTimeMillis() + 10 * 24 * 60 * 60 * 1000)) // 10 days
                 .signWith(SignatureAlgorithm.HS256, secret)
@@ -61,7 +61,7 @@ class UserService(
     }
 
     fun updateToken(user: User): User {
-        user.token = newToken(user)
+        user.token = newToken(user.email)
         return userRepository.save(user)
     }
 
