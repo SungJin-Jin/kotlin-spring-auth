@@ -35,17 +35,13 @@ class AuthApplication : WebMvcConfigurer {
     }
 
     @Bean
-    fun exposeResponseInterceptor() = ExposeResponseInterceptor()
+    fun exposeResponseInterceptor(): ExposeResponseInterceptor = ExposeResponseInterceptor()
 
     @Bean
-    fun methodValidationPostProcessor(): MethodValidationPostProcessor {
-        return MethodValidationPostProcessor().apply {
-            setValidator(validator())
-        }
-    }
+    fun methodValidationPostProcessor(): MethodValidationPostProcessor = MethodValidationPostProcessor().apply { setValidator(validator()) }
 
     @Bean
-    fun validator() = LocalValidatorFactoryBean()
+    fun validator(): LocalValidatorFactoryBean = LocalValidatorFactoryBean()
 }
 
 fun main(args: Array<String>) {

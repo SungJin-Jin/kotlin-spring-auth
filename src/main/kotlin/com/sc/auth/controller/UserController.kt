@@ -10,7 +10,6 @@ import com.sc.auth.exception.InvalidRequest
 import com.sc.auth.repository.UserRepository
 import com.sc.auth.security.ApiKeySecured
 import com.sc.auth.service.UserService
-import org.springframework.security.crypto.bcrypt.BCrypt
 import org.springframework.validation.BindException
 import org.springframework.validation.Errors
 import org.springframework.validation.FieldError
@@ -38,15 +37,14 @@ class UserController(val repository: UserRepository, val service: UserService) {
     fun login(@Valid @RequestBody login: Login, errors: Errors): Any {
         InvalidRequest.check(errors)
 
-        try {
+        return try {
             service.login(login)?.let {
                 return view(service.updateToken(it))
             }
-            return ForbiddenRequestException()
+
+            ForbiddenRequestException()
         } catch (e: InvalidLoginException) {
-            val errors = BindException(this, "")
-            errors.addError(FieldError("", e.field, e.error))
-            throw InvalidException(errors)
+            InvalidException(BindException(this, "").apply { addError(FieldError("", e.field, e.error)) })
         }
     }
 

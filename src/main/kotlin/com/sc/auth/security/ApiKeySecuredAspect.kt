@@ -17,17 +17,20 @@ import javax.servlet.http.HttpServletResponse
 
 @Aspect
 @Component
-class ApiKeySecuredAspect(@Autowired val userService: UserService) {
+class ApiKeySecuredAspect(
+        @Autowired val userService: UserService
 
+) {
     companion object {
         private val LOG = LoggerFactory.getLogger(ApiKeySecuredAspect::class.java)
     }
 
-    @Autowired
-    var request: HttpServletRequest? = null
+    @Autowired var request: HttpServletRequest? = null
 
     @Pointcut(value = "execution(@com.sc.auth.security.ApiKeySecured * *.*(..))")
-    fun securedApiPointcut() = Unit
+    fun securedApiPointcut() {
+
+    }
 
     @Around("securedApiPointcut()")
     @Throws(Throwable::class)
@@ -36,13 +39,15 @@ class ApiKeySecuredAspect(@Autowired val userService: UserService) {
 
         val response = request?.getAttribute(ExposeResponseInterceptor.KEY) as HttpServletResponse
 
-        val signature = joinPoint.signature as MethodSignature
-        val method = signature.method
+        val method = (joinPoint.signature as MethodSignature).method
         val annotation = method.getAnnotation(ApiKeySecured::class.java)
 
         val apiKey = getApiKey()
 
-        if (validateApiKey(apiKey, annotation, response)) return null
+        if (isEmptyApiKey(apiKey, annotation)) {
+            issueError(response)
+            return null
+        }
 
         var user = userService.findByToken(apiKey)
 
@@ -56,7 +61,6 @@ class ApiKeySecuredAspect(@Autowired val userService: UserService) {
             userService.validToken(apiKey, user ?: User()).not() -> when {
                 annotation.mandatory.not() && user == null -> user = User()
                 else -> {
-
                     issueError(response)
                     return null
                 }
@@ -66,35 +70,28 @@ class ApiKeySecuredAspect(@Autowired val userService: UserService) {
 
         userService.setCurrentUser(user)
 
-        try {
+        return try {
             val result = joinPoint.proceed()
 
             userService.clearCurrentUser()
 
             LOG.info("DONE accessing resource.")
 
-            return result
+            result
         } catch (e: Throwable) {
-            val rs = e.javaClass.getAnnotation(ResponseStatus::class.java)
-            if (rs != null) {
-                LOG.error("ERROR accessing resource, reason: '{}', status: {}.",
-                        if (StringUtils.isEmpty(e.message)) rs.reason else e.message,
-                        rs.value)
-            } else {
-                LOG.error("ERROR accessing resource")
-            }
-            throw e
+            throwExceptionWithResponseStatus(e)
         }
     }
 
-    fun validateApiKey(apiKey: String, annotation: ApiKeySecured, response: HttpServletResponse): Boolean {
-        if (apiKey.isEmpty() && annotation.mandatory) {
-            LOG.info("No Authorization part of the request header/parameters, returning {}.", HttpServletResponse.SC_UNAUTHORIZED)
+    fun isEmptyApiKey(apiKey: String, annotation: ApiKeySecured): Boolean {
+        return when {
+            apiKey.isEmpty() && annotation.mandatory -> {
+                LOG.info("No Authorization part of the request header/parameters, returning {}.", HttpServletResponse.SC_UNAUTHORIZED)
 
-            issueError(response)
-            return true
+                true
+            }
+            else -> false
         }
-        return false
     }
 
     fun getApiKey() = request?.getHeader("Authorization")?.replace("Token ", "") ?: ""
@@ -104,6 +101,19 @@ class ApiKeySecuredAspect(@Autowired val userService: UserService) {
         response.setHeader("Authorization", "You shall not pass without providing a valid API Key")
         response.writer.write("{\"errors\": {\"Authorization\": [\"You must provide a valid Authorization header.\"]}}")
         response.writer.flush()
+    }
+
+    fun throwExceptionWithResponseStatus(e: Throwable) {
+        val responseStatus = e.javaClass.getAnnotation(ResponseStatus::class.java)
+        if (responseStatus != null) {
+            LOG.error("ERROR accessing resource, reason: '{}', status: {}.",
+                    if (StringUtils.isEmpty(e.message)) responseStatus.reason else e.message,
+                    responseStatus.value
+            )
+        } else {
+            LOG.error("ERROR accessing resource")
+        }
+        throw e
     }
 
 }
