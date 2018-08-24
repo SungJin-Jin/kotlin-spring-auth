@@ -15,29 +15,25 @@ import org.springframework.web.bind.annotation.ResponseStatus
 import javax.servlet.http.HttpServletRequest
 import javax.servlet.http.HttpServletResponse
 
+@Suppress("UNREACHABLE_CODE")
 @Aspect
 @Component
 class ApiKeySecuredAspect(
-        @Autowired val userService: UserService
+        @Autowired val userService: UserService,
+        @Autowired val request: HttpServletRequest
 
 ) {
     companion object {
         private val LOG = LoggerFactory.getLogger(ApiKeySecuredAspect::class.java)
     }
 
-    @Autowired var request: HttpServletRequest? = null
-
     @Pointcut(value = "execution(@com.sc.auth.security.ApiKeySecured * *.*(..))")
-    fun securedApiPointcut() {
-
-    }
+    fun securedApiPointcut()  = Unit
 
     @Around("securedApiPointcut()")
     @Throws(Throwable::class)
     fun aroundSecuredApiPointcut(joinPoint: ProceedingJoinPoint): Any? {
-        if (request?.method == "OPTIONS") return joinPoint.proceed()
-
-        val response = request?.getAttribute(ExposeResponseInterceptor.KEY) as HttpServletResponse
+        if (request.method == "OPTIONS") return joinPoint.proceed()
 
         val method = (joinPoint.signature as MethodSignature).method
         val annotation = method.getAnnotation(ApiKeySecured::class.java)
@@ -45,30 +41,17 @@ class ApiKeySecuredAspect(
         val apiKey = getApiKey()
 
         if (isEmptyApiKey(apiKey, annotation)) {
-            issueError(response)
-            return null
+            return issueError()
         }
 
-        var user = userService.findByToken(apiKey)
+        val user = userService.findByToken(apiKey)
 
         when {
-            user == null && annotation.mandatory -> {
-                LOG.info("No user with Authorization: {}, returning {}.", apiKey, HttpServletResponse.SC_UNAUTHORIZED)
-
-                issueError(response)
-                return null
-            }
-            userService.validToken(apiKey, user ?: User()).not() -> when {
-                annotation.mandatory.not() && user == null -> user = User()
-                else -> {
-                    issueError(response)
-                    return null
-                }
-            }
-            else -> return null
+            user == null && annotation.mandatory -> return issueError()
+            userService.validToken(apiKey, user!!).not() -> return issueError()
         }
 
-        userService.setCurrentUser(user)
+        userService.setCurrentUser(user!!)
 
         return try {
             val result = joinPoint.proceed()
@@ -94,13 +77,19 @@ class ApiKeySecuredAspect(
         }
     }
 
-    fun getApiKey() = request?.getHeader("Authorization")?.replace("Token ", "") ?: ""
+    fun getApiKey(): String = request.getHeader("Authorization")
 
-    private fun issueError(response: HttpServletResponse) {
-        response.status = HttpServletResponse.SC_UNAUTHORIZED
-        response.setHeader("Authorization", "You shall not pass without providing a valid API Key")
-        response.writer.write("{\"errors\": {\"Authorization\": [\"You must provide a valid Authorization header.\"]}}")
-        response.writer.flush()
+    private fun issueError(): HttpServletResponse {
+        val response = request.getAttribute(ExposeResponseInterceptor.KEY) as HttpServletResponse
+
+        return with(response) {
+            status = HttpServletResponse.SC_UNAUTHORIZED
+            setHeader("Authorization", "You shall not pass without providing a valid API Key")
+            writer.write("{\"errors\": {\"Authorization\": [\"You must provide a valid Authorization header.\"]}}")
+            writer.flush()
+
+            this
+        }
     }
 
     fun throwExceptionWithResponseStatus(e: Throwable) {

@@ -20,7 +20,6 @@ import springfox.documentation.swagger2.annotations.EnableSwagger2
 @Configuration
 class SwaggerConfig : WebMvcConfigurationSupport() {
 
-
     @Bean
     fun api(): Docket {
         return Docket(DocumentationType.SWAGGER_2)
