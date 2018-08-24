@@ -1,6 +1,5 @@
 package com.sc.auth.security
 
-import com.sc.auth.datas.User
 import com.sc.auth.service.UserService
 import org.aspectj.lang.ProceedingJoinPoint
 import org.aspectj.lang.annotation.Around
@@ -19,8 +18,9 @@ import javax.servlet.http.HttpServletResponse
 @Aspect
 @Component
 class ApiKeySecuredAspect(
+        @Autowired val request: HttpServletRequest,
         @Autowired val userService: UserService,
-        @Autowired val request: HttpServletRequest
+        @Autowired val tokenManager: TokenManager
 
 ) {
     companion object {
@@ -28,7 +28,7 @@ class ApiKeySecuredAspect(
     }
 
     @Pointcut(value = "execution(@com.sc.auth.security.ApiKeySecured * *.*(..))")
-    fun securedApiPointcut()  = Unit
+    fun securedApiPointcut() = Unit
 
     @Around("securedApiPointcut()")
     @Throws(Throwable::class)
@@ -37,30 +37,21 @@ class ApiKeySecuredAspect(
 
         val method = (joinPoint.signature as MethodSignature).method
         val annotation = method.getAnnotation(ApiKeySecured::class.java)
-
         val apiKey = getApiKey()
-
-        if (isEmptyApiKey(apiKey, annotation)) {
-            return issueError()
-        }
-
         val user = userService.findByToken(apiKey)
 
-        when {
-            user == null && annotation.mandatory -> return issueError()
-            userService.validToken(apiKey, user!!).not() -> return issueError()
-        }
+        if (isEmptyApiKey(apiKey, annotation)
+                || (user == null && annotation.mandatory)
+                || tokenManager.validToken(apiKey, user!!.email).not())
+            return issueError()
 
-        userService.setCurrentUser(user!!)
+        userService.setCurrentUser(user)
 
         return try {
-            val result = joinPoint.proceed()
+            joinPoint.proceed().apply {
+                userService.clearCurrentUser()
 
-            userService.clearCurrentUser()
-
-            LOG.info("DONE accessing resource.")
-
-            result
+            }
         } catch (e: Throwable) {
             throwExceptionWithResponseStatus(e)
         }

@@ -7,7 +7,6 @@ import com.sc.auth.exception.ForbiddenRequestException
 import com.sc.auth.exception.InvalidException
 import com.sc.auth.exception.InvalidLoginException
 import com.sc.auth.exception.InvalidRequest
-import com.sc.auth.repository.UserRepository
 import com.sc.auth.security.ApiKeySecured
 import com.sc.auth.service.UserService
 import org.springframework.validation.BindException
@@ -20,15 +19,18 @@ import org.springframework.web.bind.annotation.RestController
 import javax.validation.Valid
 
 @RestController
-class UserController(val repository: UserRepository, val service: UserService) {
+class UserController(val service: UserService) {
 
     @PostMapping("/api/users")
     fun register(@Valid @RequestBody register: Register, errors: Errors): Any {
         InvalidRequest.check(errors)
 
-        val errors = BindException(this, "")
-        if (repository.existsByEmail(register.email!!)) errors.addError(createFiledError("email"))
-        InvalidRequest.check(errors)
+        if (service.existsByEmail(register.email!!)) {
+            InvalidRequest.check(BindException(this, "").apply {
+                addError(createFiledError("email"))
+
+            })
+        }
 
         return view(service.register(register))
     }
