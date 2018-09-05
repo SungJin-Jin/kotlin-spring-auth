@@ -46,14 +46,16 @@ class UserService(
 
     fun clearCurrentUser() = currentUser.remove()
 
-
     fun updateToken(user: User): User {
         user.token = tokenManager.newToken(user.email)
         return userRepository.save(user)
     }
 
-    fun existsByEmail(email: String) = userRepository.existsByEmail(email)
+    fun existsByEmail(email: String?) = userRepository.existsByEmail(email)
+
+    fun existsByUsername(username: String?) = userRepository.existsByUsername(username)
 
     fun findByToken(token: String): User? = userRepository.findByToken(token)
 
+    fun save(user: User): User = userRepository.save(user)
 }

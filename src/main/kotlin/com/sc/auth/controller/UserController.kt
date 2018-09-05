@@ -3,19 +3,18 @@ package com.sc.auth.controller
 import com.sc.auth.datas.User
 import com.sc.auth.datas.inout.Login
 import com.sc.auth.datas.inout.Register
+import com.sc.auth.datas.inout.UpdatedUser
 import com.sc.auth.exception.ForbiddenRequestException
 import com.sc.auth.exception.InvalidException
 import com.sc.auth.exception.InvalidLoginException
 import com.sc.auth.exception.InvalidRequest
 import com.sc.auth.security.ApiKeySecured
 import com.sc.auth.service.UserService
+import org.springframework.security.crypto.bcrypt.BCrypt
 import org.springframework.validation.BindException
 import org.springframework.validation.Errors
 import org.springframework.validation.FieldError
-import org.springframework.web.bind.annotation.GetMapping
-import org.springframework.web.bind.annotation.PostMapping
-import org.springframework.web.bind.annotation.RequestBody
-import org.springframework.web.bind.annotation.RestController
+import org.springframework.web.bind.annotation.*
 import javax.validation.Valid
 
 @RestController
@@ -27,8 +26,7 @@ class UserController(val service: UserService) {
 
         if (service.existsByEmail(register.email!!)) {
             InvalidRequest.check(BindException(this, "").apply {
-                addError(createFiledError("email"))
-
+                addError(createFiledError("email", "already taken"))
             })
         }
 
@@ -54,7 +52,40 @@ class UserController(val service: UserService) {
     @GetMapping("/api/user")
     fun currentUser() = view(service.currentUser())
 
-    private fun createFiledError(filed: String): FieldError = FieldError("", filed, "already taken")
+    @ApiKeySecured
+    @PutMapping("/api/user")
+    fun updateUser(@Valid @RequestBody user: UpdatedUser, errors: Errors): Any {
+        InvalidRequest.check(errors)
+
+        val currentUser = service.currentUser()
+
+        InvalidRequest.check(BindException(this, "").apply {
+            if (currentUser.email != user.email) {
+                if (service.existsByEmail(user.email)) {
+                    addError(createFiledError("email", "already taken"))
+                }
+            }
+            if (currentUser.username != user.username) {
+                if (service.existsByUsername(user.username)) {
+                    addError(createFiledError("username", "already taken"))
+                }
+            }
+        })
+
+        return view(service.save(copyUser(currentUser, user)))
+    }
+
+    fun copyUser(currentUser: User, user: UpdatedUser): User {
+        return currentUser.copy(
+                email = user.email ?: currentUser.email,
+                username = user.username ?: currentUser.username,
+                password = BCrypt.hashpw(user.password, BCrypt.gensalt()),
+                image = user.image ?: currentUser.image,
+                bio = user.bio ?: currentUser.bio
+        )
+    }
+
+    private fun createFiledError(field: String, defaultMessage: String = ""): FieldError = FieldError("", field, defaultMessage)
 
     private fun view(user: User) = mapOf("user" to user)
 }
